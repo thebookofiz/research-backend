@@ -57,13 +57,15 @@ impl RabbitMQConsumer {
                 .await
                 .map_err(|e| SyncError::Connection(format!("Failed to set prefetch count: {e}")))?;
 
-            // Declare exchange (direct type)
+            // Declare exchange (direct type) - marked as durable for message durability
+            // Note: This ensures the exchange survives RabbitMQ restarts
+            // However, for full message persistence, rindexer must also publish with delivery_mode=2
             channel
                 .exchange_declare(
                     exchange,
                     lapin::ExchangeKind::Direct,
                     ExchangeDeclareOptions {
-                        durable: false,
+                        durable: true,
                         auto_delete: false,
                         internal: false,
                         nowait: false,

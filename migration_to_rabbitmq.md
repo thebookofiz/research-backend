@@ -304,7 +304,10 @@ Blockchain → Rindexer → RabbitMQ Exchanges (5) → Queues → Dual Consumers
 3. **Create RabbitMQ consumer** (`rabbitmq_consumer.rs`):
    - **Multi-Channel Architecture**: Create one channel per queue (5 channels total)
    - Each channel has independent prefetch limit (20 messages)
-   - Declare exchanges with `durable: false` (match rindexer settings)
+   - Declare exchanges with `durable: true` (exchanges survive broker restarts)
+   - **Important**: For full message persistence, rindexer must publish with `delivery_mode=2`. 
+     See [Issue #15](https://github.com/0xIntuition/research-backend/issues/15) for details on 
+     rindexer configuration limitation and workaround options.
    - Declare queues: `surreal.atom_created`, `surreal.triple_created`, etc. with `durable: true`
    - Bind queues to exchanges with routing keys: `intuition.atom_created`, etc.
    - Implement `basic_consume` with manual acknowledgment
